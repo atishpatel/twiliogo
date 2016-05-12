@@ -17,7 +17,7 @@ type IncomingPhoneNumberList struct {
 	FirstPageUri         string                `json:"first_page_uri"`
 	LastPageUri          string                `json:"last_page_uri"`
 	NextPageUri          string                `json:"next_page_uri"`
-	PreviousPageUri      string                `json"previous_page_uri"`
+	PreviousPageUri      string                `json:"previous_page_uri"`
 	IncomingPhoneNumbers []IncomingPhoneNumber `json:"sms_messages"`
 }
 
