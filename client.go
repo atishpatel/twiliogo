@@ -25,13 +25,14 @@ type TwilioClient struct {
 	accountSid string
 	authToken  string
 	rootUrl    string
+	HTTPClient *http.Client
 }
 
 var _ Client = &TwilioClient{}
 
 func NewClient(accountSid, authToken string) *TwilioClient {
 	rootUrl := ROOT + "/" + VERSION + "/Accounts/" + accountSid
-	return &TwilioClient{accountSid, authToken, rootUrl}
+	return &TwilioClient{accountSid: accountSid, authToken: authToken, rootUrl: rootUrl, HTTPClient: &http.Client{}}
 }
 
 func (client *TwilioClient) post(values url.Values, uri string) ([]byte, error) {
@@ -43,9 +44,8 @@ func (client *TwilioClient) post(values url.Values, uri string) ([]byte, error) 
 
 	req.SetBasicAuth(client.AccountSid(), client.AuthToken())
 	req.Header.Add("Content-Type", "application/x-www-form-urlencoded")
-	httpClient := &http.Client{}
 
-	res, err := httpClient.Do(req)
+	res, err := client.HTTPClient.Do(req)
 
 	if err != nil {
 		return nil, err
@@ -87,9 +87,8 @@ func (client *TwilioClient) get(queryParams url.Values, uri string) ([]byte, err
 	}
 
 	req.SetBasicAuth(client.AccountSid(), client.AuthToken())
-	httpClient := &http.Client{}
 
-	res, err := httpClient.Do(req)
+	res, err := client.HTTPClient.Do(req)
 
 	if err != nil {
 		return nil, err
@@ -124,9 +123,8 @@ func (client *TwilioClient) delete(uri string) error {
 	}
 
 	req.SetBasicAuth(client.AccountSid(), client.AuthToken())
-	httpClient := &http.Client{}
 
-	res, err := httpClient.Do(req)
+	res, err := client.HTTPClient.Do(req)
 
 	if err != nil {
 		return err
