@@ -47,7 +47,7 @@ func NewIPCredential(client *TwilioIPMessagingClient, friendlyName string, kind 
 		params.Set("ApiKey", gcmApiKey)
 	}
 
-	res, err := client.post(params, "/Credentials.json")
+	res, err := client.post(params, "/Credentials")
 
 	if err != nil {
 		return credential, err
@@ -63,7 +63,7 @@ func NewIPCredential(client *TwilioIPMessagingClient, friendlyName string, kind 
 func GetIPCredential(client *TwilioIPMessagingClient, sid string) (*IPCredential, error) {
 	var credential *IPCredential
 
-	res, err := client.get(url.Values{}, "/Credentials/"+sid+".json")
+	res, err := client.get(url.Values{}, "/Credentials/"+sid)
 
 	if err != nil {
 		return nil, err
@@ -93,7 +93,7 @@ func UpdateIPCredential(client *TwilioIPMessagingClient, sid string, friendlyNam
 		params.Set("Sandbox", "false")
 	}
 
-	res, err := client.post(params, "/Credentials/"+sid+".json")
+	res, err := client.post(params, "/Credentials/"+sid)
 
 	if err != nil {
 		return credential, err
@@ -109,7 +109,7 @@ func UpdateIPCredential(client *TwilioIPMessagingClient, sid string, friendlyNam
 func ListIPCredentials(client *TwilioIPMessagingClient) (*IPCredentialList, error) {
 	var credentialList *IPCredentialList
 
-	body, err := client.get(nil, "/Credentials.json")
+	body, err := client.get(nil, "/Credentials")
 
 	if err != nil {
 		return credentialList, err
@@ -145,7 +145,7 @@ func (s *IPCredentialList) GetAllCredentials() ([]IPCredential, error) {
 
 // HasNextPage returns whether or not there is a next page of credentials.
 func (s *IPCredentialList) HasNextPage() bool {
-	return s.Meta.NextPageUri != ""
+	return s.Meta.NextPageUrl != ""
 }
 
 // NextPage returns the next page of credentials.
@@ -154,12 +154,12 @@ func (s *IPCredentialList) NextPage() (*IPCredentialList, error) {
 		return nil, Error{"No next page"}
 	}
 
-	return s.getPage(s.Meta.NextPageUri)
+	return s.getPage(s.Meta.NextPageUrl)
 }
 
 // HasPreviousPage indicates whether or not there is a previous page of results.
 func (s *IPCredentialList) HasPreviousPage() bool {
-	return s.Meta.PreviousPageUri != ""
+	return s.Meta.PreviousPageUrl != ""
 }
 
 // PreviousPage returns the previous page of credentials.
@@ -168,17 +168,12 @@ func (s *IPCredentialList) PreviousPage() (*IPCredentialList, error) {
 		return nil, Error{"No previous page"}
 	}
 
-	return s.getPage(s.Meta.NextPageUri)
+	return s.getPage(s.Meta.NextPageUrl)
 }
 
 // FirstPage returns the first page of credentials.
 func (s *IPCredentialList) FirstPage() (*IPCredentialList, error) {
-	return s.getPage(s.Meta.FirstPageUri)
-}
-
-// LastPage returns the last page of credentials.
-func (s *IPCredentialList) LastPage() (*IPCredentialList, error) {
-	return s.getPage(s.Meta.LastPageUri)
+	return s.getPage(s.Meta.FirstPageUrl)
 }
 
 func (s *IPCredentialList) getPage(uri string) (*IPCredentialList, error) {

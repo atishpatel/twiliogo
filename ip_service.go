@@ -10,32 +10,27 @@ import (
 
 // IPService is a IP Messaging Service resource.
 type IPService struct {
-	Sid                    string            `json:"sid"`
-	AccountSid             string            `json:"account_sid"`
-	FriendlyName           string            `json:"friendly_name"`
-	DateCreated            string            `json:"date_created"`
-	DateUpdated            string            `json:"date_updated"`
-	DefaultServiceRoleSid  string            `json:"default_service_role_sid"`
-	DefaultChannelRoleSid  string            `json:"default_channel_role_sid"`
-	TypingIndicatorTimeout uint              `json:"typing_indicator_timeout"`
-	Webhooks               map[string]string `json:"webhooks"`
-	URL                    string            `json:"url"`
-	Links                  map[string]string `json:"links"`
+	Sid                    string                 `json:"sid"`
+	AccountSid             string                 `json:"account_sid"`
+	FriendlyName           string                 `json:"friendly_name"`
+	DateCreated            string                 `json:"date_created"`
+	DateUpdated            string                 `json:"date_updated"`
+	DefaultServiceRoleSid  string                 `json:"default_service_role_sid"`
+	DefaultChannelRoleSid  string                 `json:"default_channel_role_sid"`
+	TypingIndicatorTimeout uint                   `json:"typing_indicator_timeout"`
+	Webhooks               map[string]interface{} `json:"webhooks"`
+	URL                    string                 `json:"url"`
+	Links                  map[string]string      `json:"links"`
 }
 
 // Meta is a metadata type for the IP messaging services.
 type Meta struct {
-	Start           int    `json:"start"`
-	Total           int    `json:"total"`
-	NumPages        int    `json:"num_pages"`
 	Page            int    `json:"page"`
 	PageSize        int    `json:"page_size"`
-	End             int    `json:"end"`
-	Uri             string `json:"uri"`
-	FirstPageUri    string `json:"first_page_uri"`
-	LastPageUri     string `json:"last_page_uri"`
-	NextPageUri     string `json:"next_page_uri"`
-	PreviousPageUri string `json:"previous_page_uri"`
+	FirstPageUrl    string `json:"first_page_url"`
+	PreviousPageUrl string `json:"previous_page_url"`
+	Url             string `json:"url"`
+	NextPageUrl     string `json:"next_page_url"`
 	Key             string `json:"key"`
 }
 
@@ -57,6 +52,43 @@ const (
 	WebhookOnChannelDestroy = "Webhooks.OnChannelDestroy"
 	WebhookOnMemberAdd      = "Webhooks.OnMemberAdd"
 	WebhookOnMemberRemove   = "Webhooks.OnMemberRemove"
+)
+
+// Post-event webhooks available for services to specify
+const (
+	PostWebhookOnMessageSent      = "Webhooks.OnMessageSent"
+	PostWebhookOnMessageRemoved   = "Webhooks.OnMessageRemoved"
+	PostWebhookOnMessageUpdated   = "Webhooks.OnMessageUpdated"
+	PostWebhookOnChannelAdded     = "Webhooks.OnChannelAdded"
+	PostWebhookOnChannelUpdated   = "Webhooks.OnChannelUpdated"
+	PostWebhookOnChannelDestroyed = "Webhooks.OnChannelDestroyed"
+	PostWebhookOnMemberAdded      = "Webhooks.OnMemberAdded"
+	PostWebhookOnMemberRemoved    = "Webhooks.OnMemberRemoved"
+)
+
+// Webkook pre-event types
+const (
+	EventTypeOnMessageSend    = "onMessageSend"
+	EventTypeOnMessageRemove  = "onMessageRemove"
+	EventTypeOnMessageUpdate  = "onMessageUpdate"
+	EventTypeOnChannelAdd     = "onChannelAdd"
+	EventTypeOnChannelUpdate  = "onChannelUpdate"
+	EventTypeOnChannelDestroy = "onChannelDestroy"
+	EventTypeOnMemberAdd      = "onMemberAdd"
+	EventTypeOnMemberRemove   = "onMemberRemove"
+)
+
+// Webkook post-event types
+const (
+	PostEventTypeOnMessageSend      = "onMessageSend"
+	PostEventTypeOnMessageSent      = "onMessageSent"
+	PostEventTypeOnMessageRemoved   = "onMessageRemoved"
+	PostEventTypeOnMessageUpdated   = "onMessageUpdate"
+	PostEventTypeOnChannelAdded     = "onChannelAdded"
+	PostEventTypeOnChannelUpdated   = "onChannelUpdated"
+	PostEventTypeOnChannelDestroyed = "onChannelDestroyed"
+	PostEventTypeOnMemberAdded      = "onMemberAdded"
+	PostEventTypeOnMemberRemoved    = "onMemberRemoved"
 )
 
 // Webhooks are used to define push webhooks for an IP service.
@@ -106,7 +138,7 @@ func NewIPService(client *TwilioIPMessagingClient, friendlyName string, defaultS
 		}
 	}
 
-	res, err := client.post(params, "/Services.json")
+	res, err := client.post(params, "/Services")
 
 	if err != nil {
 		return service, err
@@ -122,7 +154,7 @@ func NewIPService(client *TwilioIPMessagingClient, friendlyName string, defaultS
 func GetIPService(client *TwilioIPMessagingClient, sid string) (*IPService, error) {
 	var service *IPService
 
-	res, err := client.get(url.Values{}, "/Services/"+sid+".json")
+	res, err := client.get(url.Values{}, "/Services/"+sid)
 
 	if err != nil {
 		return nil, err
@@ -159,7 +191,7 @@ func UpdateIPService(client *TwilioIPMessagingClient, sid string, friendlyName s
 		params.Set(k, v)
 	}
 
-	res, err := client.post(params, "/Services/"+sid+".json")
+	res, err := client.post(params, "/Services/"+sid)
 
 	if err != nil {
 		return service, err
@@ -175,7 +207,7 @@ func UpdateIPService(client *TwilioIPMessagingClient, sid string, friendlyName s
 func ListIPServices(client *TwilioIPMessagingClient) (*IPServiceList, error) {
 	var serviceList *IPServiceList
 
-	body, err := client.get(nil, "/Services.json")
+	body, err := client.get(nil, "/Services")
 
 	if err != nil {
 		return serviceList, err
@@ -211,7 +243,7 @@ func (s *IPServiceList) GetAllServices() ([]IPService, error) {
 
 // HasNextPage returns whether or not there is a next page of services.
 func (s *IPServiceList) HasNextPage() bool {
-	return s.Meta.NextPageUri != ""
+	return s.Meta.NextPageUrl != ""
 }
 
 // NextPage returns the next page of services.
@@ -220,12 +252,12 @@ func (s *IPServiceList) NextPage() (*IPServiceList, error) {
 		return nil, Error{"No next page"}
 	}
 
-	return s.getPage(s.Meta.NextPageUri)
+	return s.getPage(s.Meta.NextPageUrl)
 }
 
 // HasPreviousPage indicates whether or not there is a previous page of results.
 func (s *IPServiceList) HasPreviousPage() bool {
-	return s.Meta.PreviousPageUri != ""
+	return s.Meta.PreviousPageUrl != ""
 }
 
 // PreviousPage returns the previous page of services.
@@ -234,17 +266,12 @@ func (s *IPServiceList) PreviousPage() (*IPServiceList, error) {
 		return nil, Error{"No previous page"}
 	}
 
-	return s.getPage(s.Meta.NextPageUri)
+	return s.getPage(s.Meta.NextPageUrl)
 }
 
 // FirstPage returns the first page of services.
 func (s *IPServiceList) FirstPage() (*IPServiceList, error) {
-	return s.getPage(s.Meta.FirstPageUri)
-}
-
-// LastPage returns the last page of services.
-func (s *IPServiceList) LastPage() (*IPServiceList, error) {
-	return s.getPage(s.Meta.LastPageUri)
+	return s.getPage(s.Meta.FirstPageUrl)
 }
 
 func (s *IPServiceList) getPage(uri string) (*IPServiceList, error) {

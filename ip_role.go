@@ -59,7 +59,7 @@ func NewIPRole(client *TwilioIPMessagingClient, serviceSid string, friendlyName 
 		}
 	}
 
-	res, err := client.post(params, "/Services/"+serviceSid+"/Roles.json")
+	res, err := client.post(params, "/Services/"+serviceSid+"/Roles")
 
 	if err != nil {
 		return role, err
@@ -75,7 +75,7 @@ func NewIPRole(client *TwilioIPMessagingClient, serviceSid string, friendlyName 
 func GetIPRole(client *TwilioIPMessagingClient, serviceSid, sid string) (*IPRole, error) {
 	var role *IPRole
 
-	res, err := client.get(url.Values{}, "/Services/"+serviceSid+"/Roles/"+sid+".json")
+	res, err := client.get(url.Values{}, "/Services/"+serviceSid+"/Roles/"+sid)
 
 	if err != nil {
 		return nil, err
@@ -105,7 +105,7 @@ func UpdateIPRole(client *TwilioIPMessagingClient, serviceSid string, sid string
 		}
 	}
 
-	res, err := client.post(params, "/Services/"+serviceSid+"/Roles/"+sid+".json")
+	res, err := client.post(params, "/Services/"+serviceSid+"/Roles/"+sid)
 
 	if err != nil {
 		return role, err
@@ -121,7 +121,7 @@ func UpdateIPRole(client *TwilioIPMessagingClient, serviceSid string, sid string
 func ListIPRoles(client *TwilioIPMessagingClient, serviceSid string) (*IPRoleList, error) {
 	var roleList *IPRoleList
 
-	body, err := client.get(nil, "/Services/"+serviceSid+"/Roles.json")
+	body, err := client.get(nil, "/Services/"+serviceSid+"/Roles")
 
 	if err != nil {
 		return roleList, err
@@ -157,7 +157,7 @@ func (s *IPRoleList) GetAllRoles() ([]IPRole, error) {
 
 // HasNextPage returns whether or not there is a next page of roles.
 func (s *IPRoleList) HasNextPage() bool {
-	return s.Meta.NextPageUri != ""
+	return s.Meta.NextPageUrl != ""
 }
 
 // NextPage returns the next page of roles.
@@ -166,12 +166,12 @@ func (s *IPRoleList) NextPage() (*IPRoleList, error) {
 		return nil, Error{"No next page"}
 	}
 
-	return s.getPage(s.Meta.NextPageUri)
+	return s.getPage(s.Meta.NextPageUrl)
 }
 
 // HasPreviousPage indicates whether or not there is a previous page of results.
 func (s *IPRoleList) HasPreviousPage() bool {
-	return s.Meta.PreviousPageUri != ""
+	return s.Meta.PreviousPageUrl != ""
 }
 
 // PreviousPage returns the previous page of roles.
@@ -180,17 +180,12 @@ func (s *IPRoleList) PreviousPage() (*IPRoleList, error) {
 		return nil, Error{"No previous page"}
 	}
 
-	return s.getPage(s.Meta.NextPageUri)
+	return s.getPage(s.Meta.NextPageUrl)
 }
 
 // FirstPage returns the first page of roles.
 func (s *IPRoleList) FirstPage() (*IPRoleList, error) {
-	return s.getPage(s.Meta.FirstPageUri)
-}
-
-// LastPage returns the last page of roles.
-func (s *IPRoleList) LastPage() (*IPRoleList, error) {
-	return s.getPage(s.Meta.LastPageUri)
+	return s.getPage(s.Meta.FirstPageUrl)
 }
 
 func (s *IPRoleList) getPage(uri string) (*IPRoleList, error) {

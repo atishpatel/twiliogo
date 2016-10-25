@@ -36,7 +36,7 @@ func AddIPMemberToChannel(client *TwilioIPMessagingClient, serviceSid string, ch
 		params.Set("RoleSid", roleSid)
 	}
 
-	res, err := client.post(params, "/Services/"+serviceSid+"/Channels/"+channelSid+"/Members.json")
+	res, err := client.post(params, "/Services/"+serviceSid+"/Channels/"+channelSid+"/Members")
 
 	if err != nil {
 		return member, err
@@ -52,7 +52,7 @@ func AddIPMemberToChannel(client *TwilioIPMessagingClient, serviceSid string, ch
 func GetIPChannelMember(client *TwilioIPMessagingClient, serviceSid, channelSid, sid string) (*IPMember, error) {
 	var member *IPMember
 
-	res, err := client.get(url.Values{}, "/Services/"+serviceSid+"/Channels/"+channelSid+"/Members/"+sid+".json")
+	res, err := client.get(url.Values{}, "/Services/"+serviceSid+"/Channels/"+channelSid+"/Members/"+sid)
 
 	if err != nil {
 		return nil, err
@@ -73,7 +73,7 @@ func RemoveIPMemberFromChannel(client *TwilioIPMessagingClient, serviceSid, chan
 func ListIPMembers(client *TwilioIPMessagingClient, serviceSid, channelSid string) (*IPMemberList, error) {
 	var memberList *IPMemberList
 
-	body, err := client.get(nil, "/Services/"+serviceSid+"/Channels/"+channelSid+"/Members.json")
+	body, err := client.get(nil, "/Services/"+serviceSid+"/Channels/"+channelSid+"/Members")
 
 	if err != nil {
 		return memberList, err
@@ -109,7 +109,7 @@ func (c *IPMemberList) GetAllMembers() ([]IPMember, error) {
 
 // HasNextPage returns whether or not there is a next page of members.
 func (c *IPMemberList) HasNextPage() bool {
-	return c.Meta.NextPageUri != ""
+	return c.Meta.NextPageUrl != ""
 }
 
 // NextPage returns the next page of members.
@@ -118,12 +118,12 @@ func (c *IPMemberList) NextPage() (*IPMemberList, error) {
 		return nil, Error{"No next page"}
 	}
 
-	return c.getPage(c.Meta.NextPageUri)
+	return c.getPage(c.Meta.NextPageUrl)
 }
 
 // HasPreviousPage indicates whether or not there is a previous page of results.
 func (c *IPMemberList) HasPreviousPage() bool {
-	return c.Meta.PreviousPageUri != ""
+	return c.Meta.PreviousPageUrl != ""
 }
 
 // PreviousPage returns the previous page of members.
@@ -132,17 +132,12 @@ func (c *IPMemberList) PreviousPage() (*IPMemberList, error) {
 		return nil, Error{"No previous page"}
 	}
 
-	return c.getPage(c.Meta.NextPageUri)
+	return c.getPage(c.Meta.NextPageUrl)
 }
 
 // FirstPage returns the first page of members.
 func (c *IPMemberList) FirstPage() (*IPMemberList, error) {
-	return c.getPage(c.Meta.FirstPageUri)
-}
-
-// LastPage returns the last page of members.
-func (c *IPMemberList) LastPage() (*IPMemberList, error) {
-	return c.getPage(c.Meta.LastPageUri)
+	return c.getPage(c.Meta.FirstPageUrl)
 }
 
 func (c *IPMemberList) getPage(uri string) (*IPMemberList, error) {

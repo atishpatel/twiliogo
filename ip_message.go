@@ -37,7 +37,7 @@ func SendIPMessageToChannel(client *TwilioIPMessagingClient, serviceSid string, 
 		params.Set("From", from)
 	}
 
-	res, err := client.post(params, "/Services/"+serviceSid+"/Channels/"+channelSid+"/Messages.json")
+	res, err := client.post(params, "/Services/"+serviceSid+"/Channels/"+channelSid+"/Messages")
 
 	if err != nil {
 		return message, err
@@ -53,7 +53,7 @@ func SendIPMessageToChannel(client *TwilioIPMessagingClient, serviceSid string, 
 func GetIPChannelMessage(client *TwilioIPMessagingClient, serviceSid, channelSid, sid string) (*IPMessage, error) {
 	var message *IPMessage
 
-	res, err := client.get(url.Values{}, "/Services/"+serviceSid+"/Channels/"+channelSid+"/Messages/"+sid+".json")
+	res, err := client.get(url.Values{}, "/Services/"+serviceSid+"/Channels/"+channelSid+"/Messages/"+sid)
 
 	if err != nil {
 		return nil, err
@@ -69,7 +69,7 @@ func GetIPChannelMessage(client *TwilioIPMessagingClient, serviceSid, channelSid
 func ListIPMessages(client *TwilioIPMessagingClient, serviceSid, channelSid string) (*IPMessageList, error) {
 	var messageList *IPMessageList
 
-	body, err := client.get(nil, "/Services/"+serviceSid+"/Channels/"+channelSid+"/Messages.json")
+	body, err := client.get(nil, "/Services/"+serviceSid+"/Channels/"+channelSid+"/Messages")
 
 	if err != nil {
 		return messageList, err
@@ -105,7 +105,7 @@ func (c *IPMessageList) GetAllMessages() ([]IPMessage, error) {
 
 // HasNextPage returns whether or not there is a next page of messages.
 func (c *IPMessageList) HasNextPage() bool {
-	return c.Meta.NextPageUri != ""
+	return c.Meta.NextPageUrl != ""
 }
 
 // NextPage returns the next page of messages.
@@ -114,12 +114,12 @@ func (c *IPMessageList) NextPage() (*IPMessageList, error) {
 		return nil, Error{"No next page"}
 	}
 
-	return c.getPage(c.Meta.NextPageUri)
+	return c.getPage(c.Meta.NextPageUrl)
 }
 
 // HasPreviousPage indicates whether or not there is a previous page of results.
 func (c *IPMessageList) HasPreviousPage() bool {
-	return c.Meta.PreviousPageUri != ""
+	return c.Meta.PreviousPageUrl != ""
 }
 
 // PreviousPage returns the previous page of messages.
@@ -128,17 +128,12 @@ func (c *IPMessageList) PreviousPage() (*IPMessageList, error) {
 		return nil, Error{"No previous page"}
 	}
 
-	return c.getPage(c.Meta.NextPageUri)
+	return c.getPage(c.Meta.NextPageUrl)
 }
 
 // FirstPage returns the first page of messages.
 func (c *IPMessageList) FirstPage() (*IPMessageList, error) {
-	return c.getPage(c.Meta.FirstPageUri)
-}
-
-// LastPage returns the last page of messages.
-func (c *IPMessageList) LastPage() (*IPMessageList, error) {
-	return c.getPage(c.Meta.LastPageUri)
+	return c.getPage(c.Meta.FirstPageUrl)
 }
 
 func (c *IPMessageList) getPage(uri string) (*IPMessageList, error) {

@@ -43,7 +43,7 @@ func NewIPChannel(client *TwilioIPMessagingClient, serviceSid string, friendlyNa
 	params.Set("Type", kind)
 	params.Set("Attributes", attributes)
 
-	res, err := client.post(params, "/Services/"+serviceSid+"/Channels.json")
+	res, err := client.post(params, "/Services/"+serviceSid+"/Channels")
 
 	if err != nil {
 		return channel, err
@@ -69,7 +69,7 @@ func UpdateIPChannel(client *TwilioIPMessagingClient, serviceSid string, sid str
 	params.Set("Type", kind)
 	params.Set("Attributes", attributes)
 
-	res, err := client.post(params, "/Services/"+serviceSid+"/Channels/"+sid+".json")
+	res, err := client.post(params, "/Services/"+serviceSid+"/Channels/"+sid)
 
 	if err != nil {
 		return channel, err
@@ -85,7 +85,7 @@ func UpdateIPChannel(client *TwilioIPMessagingClient, serviceSid string, sid str
 func GetIPChannel(client *TwilioIPMessagingClient, serviceSid string, sid string) (*IPChannel, error) {
 	var channel *IPChannel
 
-	res, err := client.get(url.Values{}, "/Services/"+serviceSid+"/Channels/"+sid+".json")
+	res, err := client.get(url.Values{}, "/Services/"+serviceSid+"/Channels/"+sid)
 
 	if err != nil {
 		return nil, err
@@ -106,7 +106,7 @@ func DeleteIPChannel(client *TwilioIPMessagingClient, serviceSid, sid string) er
 func ListIPChannels(client *TwilioIPMessagingClient, serviceSid string) (*IPChannelList, error) {
 	var channelList *IPChannelList
 
-	body, err := client.get(nil, "/Services/"+serviceSid+"/Channels.json")
+	body, err := client.get(nil, "/Services/"+serviceSid+"/Channels")
 
 	if err != nil {
 		return channelList, err
@@ -142,7 +142,7 @@ func (c *IPChannelList) GetAllChannels() ([]IPChannel, error) {
 
 // HasNextPage returns whether or not there is a next page of channels.
 func (c *IPChannelList) HasNextPage() bool {
-	return c.Meta.NextPageUri != ""
+	return c.Meta.NextPageUrl != ""
 }
 
 // NextPage returns the next page of channels.
@@ -151,12 +151,12 @@ func (c *IPChannelList) NextPage() (*IPChannelList, error) {
 		return nil, Error{"No next page"}
 	}
 
-	return c.getPage(c.Meta.NextPageUri)
+	return c.getPage(c.Meta.NextPageUrl)
 }
 
 // HasPreviousPage indicates whether or not there is a previous page of results.
 func (c *IPChannelList) HasPreviousPage() bool {
-	return c.Meta.PreviousPageUri != ""
+	return c.Meta.PreviousPageUrl != ""
 }
 
 // PreviousPage returns the previous page of channels.
@@ -165,17 +165,12 @@ func (c *IPChannelList) PreviousPage() (*IPChannelList, error) {
 		return nil, Error{"No previous page"}
 	}
 
-	return c.getPage(c.Meta.NextPageUri)
+	return c.getPage(c.Meta.NextPageUrl)
 }
 
 // FirstPage returns the first page of channels.
 func (c *IPChannelList) FirstPage() (*IPChannelList, error) {
-	return c.getPage(c.Meta.FirstPageUri)
-}
-
-// LastPage returns the last page of channels.
-func (c *IPChannelList) LastPage() (*IPChannelList, error) {
-	return c.getPage(c.Meta.LastPageUri)
+	return c.getPage(c.Meta.FirstPageUrl)
 }
 
 func (c *IPChannelList) getPage(uri string) (*IPChannelList, error) {
