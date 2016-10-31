@@ -29,7 +29,7 @@ type IPMessageList struct {
 }
 
 // SendIPMessageToChannel sends a message to a channel.
-func SendIPMessageToChannel(client *TwilioIPMessagingClient, serviceSid, channelSid, from, body, attr string) (*IPMessage, error) {
+func SendIPMessageToChannel(client *TwilioIPMessagingClient, serviceSid, channelSid, from, body, attributes string) (*IPMessage, error) {
 	var message *IPMessage
 
 	params := url.Values{}
