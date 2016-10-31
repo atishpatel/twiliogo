@@ -2,6 +2,10 @@ package twiliogo
 
 import "fmt"
 
+const (
+	CodeNotFound = 20404
+)
+
 type Error struct {
 	Description string
 }
