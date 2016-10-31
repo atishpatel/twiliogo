@@ -12,6 +12,7 @@ type IPUser struct {
 	ServiceSid  string `json:"service_sid"`
 	RoleSid     string `json:"role_sid"`
 	Identity    string `json:"identity"`
+	Attributes  string `json:"attributes"`
 	DateCreated string `json:"date_created"`
 	DateUpdated string `json:"date_updated"`
 	URL         string `json:"url"`
@@ -26,13 +27,13 @@ type IPUserList struct {
 }
 
 // NewIPUser creates a new IP Messaging User.
-func NewIPUser(client *TwilioIPMessagingClient, serviceSid string, identity string, roleSid string) (*IPUser, error) {
+func NewIPUser(client *TwilioIPMessagingClient, serviceSid string, identity string, roleSid string, attributes string) (*IPUser, error) {
 	var user *IPUser
 
 	params := url.Values{}
 	params.Set("Identity", identity)
 	params.Set("RoleSid", roleSid)
-
+	params.Set("Attributes", attributes)
 	res, err := client.post(params, "/Services/"+serviceSid+"/Users")
 
 	if err != nil {
@@ -67,12 +68,13 @@ func DeleteIPUser(client *TwilioIPMessagingClient, serviceSid, sid string) error
 }
 
 // UpdateIPUser updates an existing IP Messaging user.
-func UpdateIPUser(client *TwilioIPMessagingClient, serviceSid string, sid string, identity string, roleSid string) (*IPUser, error) {
+func UpdateIPUser(client *TwilioIPMessagingClient, serviceSid string, sid string, identity string, roleSid string, attributes string) (*IPUser, error) {
 	var user *IPUser
 
 	params := url.Values{}
 	params.Set("Identity", identity)
 	params.Set("RoleSid", roleSid)
+	params.Set("Attributes", attributes)
 
 	res, err := client.post(params, "/Services/"+serviceSid+"/Users/"+sid)
 
