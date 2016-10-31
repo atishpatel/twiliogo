@@ -11,6 +11,7 @@ type IPMessage struct {
 	AccountSid  string `json:"account_sid"`
 	ServiceSid  string `json:"service_sid"`
 	To          string `json:"to"` // channel sid
+	Attributes  string `json:"attributes"`
 	DateCreated string `json:"date_created"`
 	DateUpdated string `json:"date_updated"`
 	WasEdited   bool   `json:"was_edited"`
@@ -28,7 +29,7 @@ type IPMessageList struct {
 }
 
 // SendIPMessageToChannel sends a message to a channel.
-func SendIPMessageToChannel(client *TwilioIPMessagingClient, serviceSid string, channelSid string, from string, body string) (*IPMessage, error) {
+func SendIPMessageToChannel(client *TwilioIPMessagingClient, serviceSid, channelSid, from, body, attr string) (*IPMessage, error) {
 	var message *IPMessage
 
 	params := url.Values{}
@@ -36,6 +37,7 @@ func SendIPMessageToChannel(client *TwilioIPMessagingClient, serviceSid string, 
 	if from != "" {
 		params.Set("From", from)
 	}
+	params.Set("Attributes", attributes)
 
 	res, err := client.post(params, "/Services/"+serviceSid+"/Channels/"+channelSid+"/Messages")
 
