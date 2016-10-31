@@ -56,7 +56,7 @@ func NewIPChannel(client *TwilioIPMessagingClient, serviceSid string, friendlyNa
 }
 
 // UpdateIPChannel updates ane existing IP Messaging Channel.
-func UpdateIPChannel(client *TwilioIPMessagingClient, serviceSid string, sid string, friendlyName string, uniqueName string, public bool, attributes string) (*IPChannel, error) {
+func UpdateIPChannel(client *TwilioIPMessagingClient, serviceSid string, sidOrUniqueName string, friendlyName string, uniqueName string, public bool, attributes string) (*IPChannel, error) {
 	var channel *IPChannel
 
 	params := url.Values{}
@@ -69,7 +69,7 @@ func UpdateIPChannel(client *TwilioIPMessagingClient, serviceSid string, sid str
 	params.Set("Type", kind)
 	params.Set("Attributes", attributes)
 
-	res, err := client.post(params, "/Services/"+serviceSid+"/Channels/"+sid)
+	res, err := client.post(params, "/Services/"+serviceSid+"/Channels/"+sidOrUniqueName)
 
 	if err != nil {
 		return channel, err
@@ -81,11 +81,11 @@ func UpdateIPChannel(client *TwilioIPMessagingClient, serviceSid string, sid str
 	return channel, err
 }
 
-// GetIPChannel returns the specified IP Channel.
-func GetIPChannel(client *TwilioIPMessagingClient, serviceSid string, sid string) (*IPChannel, error) {
+// GetIPChannel returns the specified IP Channel with SID or UniqueName.
+func GetIPChannel(client *TwilioIPMessagingClient, serviceSid string, sidOrUniqueName string) (*IPChannel, error) {
 	var channel *IPChannel
 
-	res, err := client.get(url.Values{}, "/Services/"+serviceSid+"/Channels/"+sid)
+	res, err := client.get(url.Values{}, "/Services/"+serviceSid+"/Channels/"+sidOrUniqueName)
 
 	if err != nil {
 		return nil, err
@@ -98,8 +98,8 @@ func GetIPChannel(client *TwilioIPMessagingClient, serviceSid string, sid string
 }
 
 // DeleteIPChannel deletes the given IP Channel.
-func DeleteIPChannel(client *TwilioIPMessagingClient, serviceSid, sid string) error {
-	return client.delete("/Services/" + serviceSid + "/Channels/" + sid)
+func DeleteIPChannel(client *TwilioIPMessagingClient, serviceSid, sidOrUniqueName string) error {
+	return client.delete("/Services/" + serviceSid + "/Channels/" + sidOrUniqueName)
 }
 
 // ListIPChannels returns the first page of channels.
