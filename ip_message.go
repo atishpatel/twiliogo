@@ -51,6 +51,26 @@ func SendIPMessageToChannel(client *TwilioIPMessagingClient, serviceSid, channel
 	return message, err
 }
 
+// UpdateIPMessage updates ane existing IP Message.
+func UpdateIPMessage(client *TwilioIPMessagingClient, serviceSid, channelSid, messageSid, body, attributes string) (*IPMessage, error) {
+	var message *IPMessage
+
+	params := url.Values{}
+	params.Set("Body", body)
+	params.Set("Attributes", attributes)
+
+	res, err := client.post(params, "/Services/"+serviceSid+"/Channels/"+channelSid+"/Messages/"+messageSid)
+
+	if err != nil {
+		return message, err
+	}
+
+	message = new(IPMessage)
+	err = json.Unmarshal(res, message)
+
+	return message, err
+}
+
 // GetIPChannelMessage returns the specified IP Message in the channel.
 func GetIPChannelMessage(client *TwilioIPMessagingClient, serviceSid, channelSid, sid string) (*IPMessage, error) {
 	var message *IPMessage
